@@ -23,6 +23,10 @@ dependencies = [
     "httpx[http2]~=0.28.1",
     "loguru~=0.7.3",
     "pydantic~=2.11.3",
+    "fastapi~=0.115.0",
+    "uvicorn[standard]~=0.32.0",
+    "python-multipart~=0.0.12",
+    "requests~=2.31.0",
 ]
 dynamic = ["version"]
 
