@@ -34,6 +34,8 @@ A reverse-engineered asynchronous python wrapper for [Google Gemini](https://gem
 - **Classified Outputs** - Automatically categorizes texts, web images and AI generated images in the response.
 - **Official Flavor** - Provides a simple and elegant interface inspired by [Google Generative AI](https://ai.google.dev/tutorials/python_quickstart)'s official API.
 - **Asynchronous** - Utilizes `asyncio` to run generating tasks and return outputs efficiently.
+- **OpenAI-Compatible API Server** - Includes a FastAPI server that provides OpenAI-compatible endpoints for easy integration with existing applications.
+- **Multi-Cookie Support** - Supports multiple Google accounts for load balancing and fault tolerance.
 
 ## Table of Contents
 
@@ -54,6 +56,14 @@ A reverse-engineered asynchronous python wrapper for [Google Gemini](https://gem
   - [Generate contents with Gemini extensions](#generate-contents-with-gemini-extensions)
   - [Check and switch to other reply candidates](#check-and-switch-to-other-reply-candidates)
   - [Logging Configuration](#logging-configuration)
+- [OpenAI-Compatible API Server](#openai-compatible-api-server)
+  - [Quick Start](#quick-start)
+  - [Available Models](#available-models)
+  - [API Endpoints](#api-endpoints)
+  - [Client Usage Examples](#client-usage-examples)
+    - [OpenAI Python Client](#openai-python-client)
+    - [ChatGPT.js](#chatgptjs)
+  - [Multi-Cookie Support](#multi-cookie-support)
 - [References](#references)
 - [Stargazers](#stargazers)
 
@@ -366,6 +376,100 @@ set_log_level("DEBUG")
 > [!NOTE]
 >
 > Calling `set_log_level` for the first time will **globally** remove all existing loguru handlers. You may want to configure logging directly with loguru to avoid this issue and have more advanced control over logging behaviors.
+
+## OpenAI-Compatible API Server
+
+### Quick Start
+
+To run the OpenAI-compatible API server, use the following command:
+
+```bash
+python -m gemini_webapi.server
+```
+
+By default, the server will run on `http://127.0.0.1:8000`. You can specify a different host and port using environment variables:
+
+```bash
+GEMINI_HOST=0.0.0.0 GEMINI_PORT=8080 python -m gemini_webapi.server
+```
+
+### Available Models
+
+The server supports the following models:
+
+- `gemini-2.0-flash`
+- `gemini-2.0-flash-thinking`
+- `gemini-2.5-flash`
+- `gemini-2.5-pro`
+
+### API Endpoints
+
+The server provides the following OpenAI-compatible endpoints:
+
+- `/v1/completions`
+- `/v1/chat/completions`
+- `/v1/edits`
+- `/v1/images/generations`
+- `/v1/images/edits`
+- `/v1/images/variations`
+
+### Client Usage Examples
+
+Here are some examples of how to use the OpenAI-compatible API server with popular clients:
+
+#### OpenAI Python Client
+
+```python
+import openai
+
+openai.api_base = "http://localhost:8000"
+openai.api_key = "your-api-key"
+
+response = openai.Completion.create(
+    engine="gemini-2.0-flash",
+    prompt="Hello! How can I assist you today?",
+    max_tokens=50
+)
+
+print(response.choices[0].text.strip())
+```
+
+#### ChatGPT.js
+
+```javascript
+const { Configuration, OpenAIApi } = require("openai");
+
+const configuration = new Configuration({
+  apiKey: "your-api-key",
+  basePath: "http://localhost:8000/v1",
+});
+
+const openai = new OpenAIApi(configuration);
+
+openai.createChatCompletion({
+  model: "gemini-2.0-flash-thinking",
+  messages: [
+    { role: "system", content: "You are a helpful assistant." },
+    { role: "user", content: "Hello! How can I assist you today?" },
+  ],
+  max_tokens: 50,
+}).then(response => {
+  console.log(response.data.choices[0].message.content);
+});
+```
+
+### Multi-Cookie Support
+
+To use multiple Google accounts for load balancing and fault tolerance, you can set the `GEMINI_COOKIES` environment variable with a JSON array of cookie objects:
+
+```bash
+GEMINI_COOKIES='[
+  {"Secure_1PSID": "cookie1", "Secure_1PSIDTS": "cookie1_ts"},
+  {"Secure_1PSID": "cookie2", "Secure_1PSIDTS": "cookie2_ts"}
+]' python -m gemini_webapi.server
+```
+
+The server will automatically distribute requests across the available accounts.
 
 ## References
 
